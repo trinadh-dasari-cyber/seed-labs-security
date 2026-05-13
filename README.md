@@ -1,12 +1,14 @@
-# 🔎 Splunk Log Analysis & Threat Hunting
+# 🧪 SEED Labs — Software & Linux Security Research
 
-**Academic project — SIEM log analysis and threat hunting using Splunk as part of MS Cybersecurity coursework at University of Central Missouri**
+**Academic project — binary exploitation and Linux privilege escalation research as part of MS Cybersecurity coursework at University of Central Missouri**
+
+> ⚠️ Disclaimer: All research was conducted in isolated SEED Lab virtual machine environments for academic purposes only.
 
 ---
 
 ## Overview
 
-This project was completed as part of my MS Cybersecurity program at the University of Central Missouri. I ingested and analyzed Windows and Linux logs in Splunk, built SPL correlation searches targeting known attack patterns, and produced structured threat hunting reports mapped to MITRE ATT&CK — simulating real-world SOC analyst workflows.
+This project was completed as part of my MS Cybersecurity program at the University of Central Missouri. Through the SEED Labs curriculum I conducted hands-on exploitation research covering binary exploitation techniques, Linux privilege escalation vectors, and OS-level attack surfaces — building practical understanding that directly informs both offensive research and defensive hardening.
 
 ---
 
@@ -14,72 +16,71 @@ This project was completed as part of my MS Cybersecurity program at the Univers
 
 - **Institution:** University of Central Missouri
 - **Program:** MS Cybersecurity
-- **Focus:** SIEM engineering, threat detection, log analysis
+- **Course:** Software Security
+- **Lab Environment:** SEED Labs (Syracuse University curriculum)
 
 ---
 
-## Log Sources Used
+## Labs Completed
 
-- **Windows Security Logs** — Event IDs: 4624, 4625, 4648, 4672, 4688
-- **Linux Syslogs** — Auth failures, sudo usage, cron activity
+### 1. Buffer Overflow Exploitation
+- Exploited stack-based buffer overflows on 32-bit and 64-bit Linux systems
+- Used GDB to analyze stack memory layouts, calculate offsets, and craft shellcode payloads
+- Bypassed basic stack protections to achieve code execution
+
+**Key concepts:** Stack layout, return address overwrite, shellcode injection, NOP sleds
+
+### 2. Return-to-libc & ROP Chains
+- Bypassed non-executable stack (NX bit) using return-to-libc technique
+- Constructed ROP chains to achieve code execution without injecting shellcode
+- Chained gadgets to call system("/bin/sh") via libc
+
+**Key concepts:** NX bypass, ROP gadgets, libc base address calculation, ASLR interaction
+
+### 3. Set-UID Privilege Escalation
+- Investigated how misconfigured Set-UID programs can be abused for privilege escalation
+- Exploited PATH hijacking by replacing trusted binaries with malicious versions
+- Abused environment variable manipulation to influence privileged program behavior
+
+**Key concepts:** Set-UID mechanics, PATH injection, environment variable attacks, least-privilege principle
+
+### 4. Race Condition Vulnerabilities (TOCTOU)
+- Demonstrated Time-of-Check to Time-of-Use race conditions in privileged programs
+- Exploited the window between a file permission check and file access to write to protected locations
+
+**Key concepts:** TOCTOU, race windows, symlink attacks, atomic operations
+
+### 5. Dynamic Linker Abuse (LD_PRELOAD)
+- Used LD_PRELOAD to inject custom shared libraries and intercept libc function calls
+- Demonstrated how misconfigured environments allow library preloading in privileged contexts
+
+**Key concepts:** Dynamic linking, shared library injection, LD_PRELOAD restrictions
 
 ---
 
-## What Was Done
+## Tools Used
 
-### Log Ingestion & Normalization
-- Ingested Windows Security event logs and Linux syslogs into Splunk
-- Configured index management and sourcetype parsing for consistent log structure
-- Normalized field names for cross-source correlation
-
-### SPL Correlation Searches Built
-
-**Brute-force detection — 10+ failed logins in 5 minutes:**
-
-    index=windows EventCode=4625
-    | bin _time span=5m
-    | stats count as FailCount by src_ip, user, _time
-    | where FailCount > 10
-
-**Privilege escalation — account added to admin group:**
-
-    index=windows EventCode=4728 OR EventCode=4732
-    | table _time, src_user, user, Group_Name, host
-
-**Lateral movement — unusual remote login pattern:**
-
-    index=windows EventCode=4624 Logon_Type=3
-    | stats dc(host) as UniqueHosts by user
-    | where UniqueHosts > 3
-
-### Real-Time Alerting
-- Configured alerts for brute-force attempts, privilege escalation sequences, and lateral movement
-- Applied alert throttling to reduce noise on high-volume log sources
-
-### Threat Hunting Reports
-- Investigated flagged events and reconstructed attack timelines
-- Mapped findings to MITRE ATT&CK tactics and techniques
-- Produced structured hunting reports aligned to SOC analytical workflows
+`GDB` `Python` `C` `Linux (Ubuntu)` `objdump` `readelf` `ltrace` `strace`
 
 ---
 
 ## What I Learned
 
-- How enterprise SIEM platforms ingest and normalize multi-source log data
-- How to write SPL searches that detect real attack patterns
-- How SOC analysts think through lateral movement and privilege escalation scenarios
-- How MITRE ATT&CK maps to actual log events and detection logic
+- How memory is laid out on the stack and how overflows overwrite return addresses
+- How modern defenses like NX and ASLR work and how attackers bypass them
+- How Set-UID programs can be abused when least-privilege principles are not enforced
+- How race conditions create exploitable windows in privileged code paths
+- How these low-level attack techniques directly inform defensive hardening strategies
 
 ---
 
-## MITRE ATT&CK Coverage
+## Frameworks Referenced
 
-- **T1110** — Brute Force (Credential Access) → Failed login correlation
-- **T1078** — Valid Accounts (Privilege Escalation) → Admin group membership changes
-- **T1021** — Remote Services (Lateral Movement) → Cross-host login analysis
+- MITRE ATT&CK: T1055 (Process Injection), T1574 (Hijack Execution Flow), T1548 (Abuse Elevation Control Mechanism)
+- CWE-121 (Stack-Based Buffer Overflow), CWE-367 (TOCTOU Race Condition)
 
 ---
 
 ## Skills Demonstrated
 
-`Splunk` `SPL` `Log Analysis` `Threat Hunting` `MITRE ATT&CK` `SIEM Engineering` `Windows Event Logs` `Linux Syslog` `Incident Response`
+`Binary Exploitation` `Memory Analysis` `Privilege Escalation` `Linux Security` `Reverse Engineering` `Exploit Development` `Defensive Hardening`
